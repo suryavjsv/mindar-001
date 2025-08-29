@@ -21,6 +21,16 @@
       });
       const { renderer, scene, camera } = mindarThree;
 
+      // ✅ Add lights
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+      hemiLight.position.set(0, 1, 0); // sky above
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+      dirLight.position.set(3, 5, 2); // like sunlight
+      dirLight.castShadow = true;
+      scene.add(dirLight);
+
       // Anchor for the first image target
       const anchor = mindarThree.addAnchor(0);
 
@@ -29,7 +39,7 @@
       loader.load("./batman.glb", (gltf) => {
         const model = gltf.scene;
         model.scale.set(0.01, 0.01, 0.01); // much smaller
-        model.position.set(0, 0, 0); // center on target
+        model.position.set(0, -0.2, 0); // center on target
 
         anchor.group.add(model);
       });
