@@ -1,0 +1,128 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+          "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { MindARThree } from "mindar-image-three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+      const mindarThree = new MindARThree({
+        container: document.querySelector("#container"),
+        imageTargetSrc: "./reactor.mind", // your image target file
+      });
+      const { renderer, scene, camera } = mindarThree;
+
+      // ✅ Add lights so model isn’t dark
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+      hemiLight.position.set(0, 1, 0);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+      dirLight.position.set(3, 5, 2);
+      dirLight.castShadow = true;
+      scene.add(dirLight);
+
+      // Anchor for the first image target
+      const anchor = mindarThree.addAnchor(0);
+
+     // Load GLB model (transmission tower)
+      const loader = new GLTFLoader();
+      loader.load("./reactor.glb", (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(.1, .1, .1); // much smaller
+        model.position.set(0, 0, 0); // center on target
+
+        anchor.group.add(model);
+      });
+
+      // Start AR session
+      const start = async () => {
+        await mindarThree.start();
+        renderer.setAnimationLoop(() => {
+          renderer.render(scene, camera);
+        });
+      };
+
+      // Buttons
+      const startButton = document.querySelector("#startButton");
+      startButton.addEventListener("click", () => {
+        start();
+      });
+      const stopButton = document.querySelector("#stopButton");
+      stopButton.addEventListener("click", () => {
+        mindarThree.stop();
+        mindarThree.renderer.setAnimationLoop(null);
+      });
+    </script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+      #control {
+        position: fixed;
+        bottom: 20px;              /* stick to bottom */
+        left: 50%;                 /* center horizontally */
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        gap: 12px;                 /* spacing between buttons */
+      }
+      #control button {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        transition: all 0.2s ease;
+      }
+      /* Start button (blue) */
+      #startButton {
+        background: #007bff;
+      }
+      #startButton:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+      }
+      #startButton:active {
+        transform: scale(0.95);
+      }
+      /* Stop button (red) */
+      #stopButton {
+        background: #dc3545;
+      }
+      #stopButton:hover {
+        background: #a71d2a;
+        transform: translateY(-2px);
+      }
+      #stopButton:active {
+        transform: scale(0.95);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="control">
+      <button id="startButton">Start</button>
+      <button id="stopButton">Stop</button>
+    </div>
+    <div id="container"></div>
+  </body>
+</html>
