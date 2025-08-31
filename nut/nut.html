@@ -21,21 +21,20 @@
       });
       const { renderer, scene, camera } = mindarThree;
 
-      
-      // ✅ Add lights
+      // ✅ Add lights so model isn’t dark
       const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-      hemiLight.position.set(0, 1, 0); // sky above
+      hemiLight.position.set(0, 1, 0);
       scene.add(hemiLight);
 
       const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-      dirLight.position.set(3, 5, 2); // like sunlight
+      dirLight.position.set(3, 5, 2);
       dirLight.castShadow = true;
       scene.add(dirLight);
 
       // Anchor for the first image target
       const anchor = mindarThree.addAnchor(0);
 
-      // Load GLB model (transmission tower)
+     // Load GLB model (transmission tower)
       const loader = new GLTFLoader();
       loader.load("./nut.glb", (gltf) => {
         const model = gltf.scene;
@@ -67,6 +66,7 @@
     <style>
       body {
         margin: 0;
+        font-family: "Segoe UI", sans-serif;
       }
       #container {
         width: 100vw;
@@ -76,9 +76,45 @@
       }
       #control {
         position: fixed;
-        top: 0;
-        left: 0;
+        bottom: 20px;              /* stick to bottom */
+        left: 50%;                 /* center horizontally */
+        transform: translateX(-50%);
         z-index: 2;
+        display: flex;
+        gap: 12px;                 /* spacing between buttons */
+      }
+      #control button {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        transition: all 0.2s ease;
+      }
+      /* Start button (blue) */
+      #startButton {
+        background: #007bff;
+      }
+      #startButton:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+      }
+      #startButton:active {
+        transform: scale(0.95);
+      }
+      /* Stop button (red) */
+      #stopButton {
+        background: #dc3545;
+      }
+      #stopButton:hover {
+        background: #a71d2a;
+        transform: translateY(-2px);
+      }
+      #stopButton:active {
+        transform: scale(0.95);
       }
     </style>
   </head>
