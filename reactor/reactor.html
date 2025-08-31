@@ -38,7 +38,7 @@
       const loader = new GLTFLoader();
       loader.load("./reactor.glb", (gltf) => {
         const model = gltf.scene;
-        model.scale.set(0.01, 0.01, 0.01); // much smaller
+        model.scale.set(0.1, 0.1, 0.1); // much smaller
         model.position.set(0, 0, 0); // center on target
 
         anchor.group.add(model);
