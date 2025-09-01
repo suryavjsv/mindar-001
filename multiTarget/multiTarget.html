@@ -5,59 +5,59 @@
    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
    <style>
-     body, html {
-       margin: 0;
-       padding: 0;
-       overflow: hidden;
-       font-family: "Segoe UI", sans-serif;
-       background: #111;
-       color: #fff;
-     }
+     html,body { height:100%; margin:0; font-family: "Segoe UI",sans-serif; background:#000; color:#fff; }
      #controls {
-       position: absolute;
-       top: 20px;
-       left: 50%;
-       transform: translateX(-50%);
-       display: flex;
-       gap: 12px;
-       z-index: 10;
+       position: absolute; top:18px; left:50%; transform:translateX(-50%);
+       z-index: 20; display:flex; gap:10px;
      }
      button {
-       padding: 10px 20px;
-       font-size: 16px;
-       font-weight: 600;
-       border-radius: 6px;
-       border: none;
-       cursor: pointer;
-       transition: background 0.3s;
+       padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:700;
      }
-     #startBtn { background: #28a745; color: white; }
-     #stopBtn  { background: #dc3545; color: white; }
-     button:disabled { background: #444; cursor: not-allowed; }
+     button:disabled { opacity:0.45; cursor:not-allowed; }
+     #startBtn { background:#0d6efd; color:white; }
+     #stopBtn  { background:#dc3545; color:white; }
+
+     /* Instruction overlay */
+     #overlay {
+       position: absolute; inset:0; display:flex; align-items:center; justify-content:center;
+       z-index: 15; pointer-events:none;
+     }
+     .bubble {
+       pointer-events:auto;
+       background: rgba(0,0,0,0.65); color:#fff; padding:14px 18px; border-radius:10px;
+       box-shadow: 0 6px 18px rgba(0,0,0,0.5); font-size:16px;
+     }
+     /* small helper for status text */
+     #status {
+       position: absolute; right: 12px; bottom: 12px; z-index: 20; font-size:13px; opacity:0.9;
+     }
    </style>
  </head>
+
  <body>
    <div id="controls">
-     <button id="startBtn">▶ Start AR</button>
+     <button id="startBtn" disabled>▶ Start AR</button>
      <button id="stopBtn" disabled>■ Stop AR</button>
    </div>
 
-   <a-scene
-     id="scene"
-     mindar-image="imageTargetSrc: ./multi-targets.mind; 
-                   maxTrack: 4; 
-                   autoStart: false; 
-                   filterMinCF: 0.001; 
-                   filterBeta: 0.05; 
-                   warmupTolerance: 1; 
-                   missTolerance: 5"
-     color-space="sRGB"
-     renderer="colorManagement: true, physicallyCorrectLights"
-     vr-mode-ui="enabled: false"
-     device-orientation-permission-ui="enabled: false"
-     embedded
-   >
+   <div id="overlay">
+     <div class="bubble" id="instruction">Point your camera at a marker</div>
+   </div>
+
+   <div id="status"></div>
+
+   <!-- A-Frame scene (autoStart disabled) -->
+   <a-scene id="scene"
+            mindar-image="imageTargetSrc: ./multi-targets.mind; maxTrack: 4; autoStart: false;
+                          filterMinCF: 0.001; filterBeta: 0.05; warmupTolerance: 1; missTolerance: 5"
+            color-space="sRGB"
+            renderer="colorManagement: true, physicallyCorrectLights"
+            vr-mode-ui="enabled: false"
+            device-orientation-permission-ui="enabled: false"
+            embedded>
+
      <a-assets>
        <a-asset-item id="city" src="./city.glb"></a-asset-item>
        <a-asset-item id="logo" src="./batman.glb"></a-asset-item>
@@ -65,50 +65,140 @@
        <a-asset-item id="reactor" src="./reactor.glb"></a-asset-item>
      </a-assets>
 
-     <!-- LIGHTING -->
-     <a-light type="ambient" intensity="0.8"></a-light>
-     <a-light type="directional" intensity="0.7" position="1 2 1"></a-light>
-     <a-light type="directional" intensity="0.4" position="-1 -1 0"></a-light>
+     <!-- LIGHTING (good baseline for PBR glTFs) -->
+     <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+     <a-entity light="type: directional; intensity: 0.7" position="1 2 1"></a-entity>
+     <a-entity light="type: directional; intensity: 0.4" position="-1 -1 0"></a-entity>
 
      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-     <!-- Target 0 -->
-     <a-entity mindar-image-target="targetIndex: 0">
+     <!-- Targets (keep models near origin and small scales) -->
+     <a-entity id="t0" mindar-image-target="targetIndex: 0">
        <a-gltf-model src="#city" position="0 0 0" scale="0.05 0.05 0.05"></a-gltf-model>
      </a-entity>
 
-     <!-- Target 1 -->
-     <a-entity mindar-image-target="targetIndex: 1">
+     <a-entity id="t1" mindar-image-target="targetIndex: 1">
        <a-gltf-model src="#logo" position="0 -0.2 0" scale="0.01 0.01 0.01"></a-gltf-model>
      </a-entity>
 
-     <!-- Target 2 -->
-     <a-entity mindar-image-target="targetIndex: 2">
+     <a-entity id="t2" mindar-image-target="targetIndex: 2">
        <a-gltf-model src="#nut" position="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
      </a-entity>
 
-     <!-- Target 3 -->
-     <a-entity mindar-image-target="targetIndex: 3">
+     <a-entity id="t3" mindar-image-target="targetIndex: 3">
        <a-gltf-model src="#reactor" position="0 -0.2 0" scale="0.1 0.1 0.1"></a-gltf-model>
      </a-entity>
+
    </a-scene>
 
    <script>
-     const sceneEl = document.querySelector("#scene");
-     const startBtn = document.querySelector("#startBtn");
-     const stopBtn = document.querySelector("#stopBtn");
+     (function(){
+       const sceneEl = document.querySelector("#scene");
+       const startBtn = document.querySelector("#startBtn");
+       const stopBtn  = document.querySelector("#stopBtn");
+       const overlay  = document.querySelector("#overlay");
+       const instruction = document.querySelector("#instruction");
+       const statusEl = document.querySelector("#status");
 
-     startBtn.addEventListener("click", () => {
-       sceneEl.components["mindar-image"].start();
+       // disable start/stop until scene/system ready
        startBtn.disabled = true;
-       stopBtn.disabled = false;
-     });
-
-     stopBtn.addEventListener("click", () => {
-       sceneEl.components["mindar-image"].stop();
-       startBtn.disabled = false;
        stopBtn.disabled = true;
-     });
+       statusEl.textContent = "Initializing AR scene...";
+
+       let arSystem = null;
+       let isRunning = false;
+       const visibleTargets = new Set();
+
+       // wait for the a-scene to finish loading its systems/components
+       sceneEl.addEventListener("loaded", () => {
+         // system name used by MindAR's A-Frame wrapper
+         arSystem = sceneEl.systems["mindar-image-system"];
+         if(!arSystem){
+           statusEl.textContent = "MindAR system not found (check script import)";
+           console.error("mindar-image-system missing on scene:", sceneEl.systems);
+           return;
+         }
+         statusEl.textContent = "AR ready to start";
+         startBtn.disabled = false;
+       });
+
+       // Listen for AR ready / error events emitted by the scene
+       sceneEl.addEventListener("arReady", () => {
+         statusEl.textContent = "Camera active — looking for markers...";
+       });
+       sceneEl.addEventListener("arError", (e) => {
+         statusEl.textContent = "AR error";
+         console.error("MindAR error:", e);
+         alert("AR failed to start. Check camera permissions and HTTPS.");
+         // re-enable start so user can retry
+         startBtn.disabled = false;
+         stopBtn.disabled = true;
+       });
+
+       // Manage start/stop lifecycle using the system API
+       startBtn.addEventListener("click", async () => {
+         if(!arSystem) return;
+         try {
+           startBtn.disabled = true;
+           statusEl.textContent = "Starting camera...";
+           // arSystem.start() may or may not return a promise; support both
+           const p = arSystem.start();
+           if(p && typeof p.then === "function") await p;
+           isRunning = true;
+           stopBtn.disabled = false;
+           statusEl.textContent = "Camera running — point at markers";
+           // overlay stays visible until a target is found
+         } catch (err) {
+           console.error("start error", err);
+           statusEl.textContent = "Start failed";
+           startBtn.disabled = false;
+           stopBtn.disabled = true;
+         }
+       });
+
+       stopBtn.addEventListener("click", () => {
+         if(!arSystem) return;
+         try {
+           arSystem.stop();
+           isRunning = false;
+           startBtn.disabled = false;
+           stopBtn.disabled = true;
+           statusEl.textContent = "AR stopped";
+           // show instructions again
+           overlay.style.display = "flex";
+           visibleTargets.clear();
+         } catch (err) {
+           console.error("stop error", err);
+         }
+       });
+
+       // hook targetFound/targetLost on every target entity to track visibility
+       // When any target is visible -> hide overlay. When none -> show overlay.
+       const setupTargetListeners = () => {
+         const targets = sceneEl.querySelectorAll('[mindar-image-target]');
+         targets.forEach((t) => {
+           t.addEventListener('targetFound', () => {
+             visibleTargets.add(t);
+             overlay.style.display = "none";
+             // optional: tiny status change
+             statusEl.textContent = "Target found";
+           });
+           t.addEventListener('targetLost', () => {
+             visibleTargets.delete(t);
+             if(visibleTargets.size === 0 && isRunning){
+               overlay.style.display = "flex";
+               statusEl.textContent = "No targets visible";
+             }
+           });
+         });
+       };
+
+       // Attach listeners once scene is parsed (loaded)
+       sceneEl.addEventListener("loaded", setupTargetListeners);
+
+       // safety: if the user hasn't interacted and browser requires gesture to start camera,
+       // start button will still prompt them — keep UX simple.
+     })();
    </script>
  </body>
 </html>
