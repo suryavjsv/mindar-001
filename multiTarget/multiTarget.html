@@ -1,36 +1,114 @@
-
+<!doctype html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  </head>
-  <body>
-    <a-scene mindar-image="imageTargetSrc: ./multi-targets.mind; 
-      maxTrack: 4" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
-      vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      <a-assets>
-        <a-asset-item id="city" src="./city.glb"></a-asset-item>
-        <a-asset-item id="logo" src="./batman.glb"></a-asset-item>
-        <a-asset-item id="nut" src="./nut.glb"></a-asset-item>
-        <a-asset-item id="reactor" src="./reactor.glb"></a-asset-item>
-      </a-assets>
+ <head>
+   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+   <style>
+     body, html {
+       margin: 0;
+       padding: 0;
+       overflow: hidden;
+       font-family: "Segoe UI", sans-serif;
+       background: #111;
+       color: #fff;
+     }
+     #controls {
+       position: absolute;
+       top: 20px;
+       left: 50%;
+       transform: translateX(-50%);
+       display: flex;
+       gap: 12px;
+       z-index: 10;
+     }
+     button {
+       padding: 10px 20px;
+       font-size: 16px;
+       font-weight: 600;
+       border-radius: 6px;
+       border: none;
+       cursor: pointer;
+       transition: background 0.3s;
+     }
+     #startBtn { background: #28a745; color: white; }
+     #stopBtn  { background: #dc3545; color: white; }
+     button:disabled { background: #444; cursor: not-allowed; }
+   </style>
+ </head>
+ <body>
+   <div id="controls">
+     <button id="startBtn">▶ Start AR</button>
+     <button id="stopBtn" disabled>■ Stop AR</button>
+   </div>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+   <a-scene
+     id="scene"
+     mindar-image="imageTargetSrc: ./multi-targets.mind; 
+                   maxTrack: 4; 
+                   autoStart: false; 
+                   filterMinCF: 0.001; 
+                   filterBeta: 0.05; 
+                   warmupTolerance: 1; 
+                   missTolerance: 5"
+     color-space="sRGB"
+     renderer="colorManagement: true, physicallyCorrectLights"
+     vr-mode-ui="enabled: false"
+     device-orientation-permission-ui="enabled: false"
+     embedded
+   >
+     <a-assets>
+       <a-asset-item id="city" src="./city.glb"></a-asset-item>
+       <a-asset-item id="logo" src="./batman.glb"></a-asset-item>
+       <a-asset-item id="nut" src="./nut.glb"></a-asset-item>
+       <a-asset-item id="reactor" src="./reactor.glb"></a-asset-item>
+     </a-assets>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model rotation="0 0 0 " position="0 0 0" scale="0.05 0.05 0.05" src="#city">
-      </a-entity>
-      <a-entity mindar-image-target="targetIndex: 1">
-        <a-gltf-model rotation="0 0 0 " position="0 -0.2 0" scale="0.01 0.01 0.01" src="#logo">
-      </a-entity>
-      <a-entity mindar-image-target="targetIndex: 2">
-        <a-gltf-model rotation="0 0 0 " position="0 0 0" scale="0.01 0.01 0.01" src="#nut">
-      </a-entity>
-      <a-entity mindar-image-target="targetIndex: 3">
-        <a-gltf-model rotation="0 0 0 " position="0 -0.2 0" scale="0.1 0.1 0.1" src="#reactor">
-      </a-entity>
-    </a-scene>
-  </body>
+     <!-- LIGHTING -->
+     <a-light type="ambient" intensity="0.8"></a-light>
+     <a-light type="directional" intensity="0.7" position="1 2 1"></a-light>
+     <a-light type="directional" intensity="0.4" position="-1 -1 0"></a-light>
+
+     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+     <!-- Target 0 -->
+     <a-entity mindar-image-target="targetIndex: 0">
+       <a-gltf-model src="#city" position="0 0 0" scale="0.05 0.05 0.05"></a-gltf-model>
+     </a-entity>
+
+     <!-- Target 1 -->
+     <a-entity mindar-image-target="targetIndex: 1">
+       <a-gltf-model src="#logo" position="0 -0.2 0" scale="0.01 0.01 0.01"></a-gltf-model>
+     </a-entity>
+
+     <!-- Target 2 -->
+     <a-entity mindar-image-target="targetIndex: 2">
+       <a-gltf-model src="#nut" position="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
+     </a-entity>
+
+     <!-- Target 3 -->
+     <a-entity mindar-image-target="targetIndex: 3">
+       <a-gltf-model src="#reactor" position="0 -0.2 0" scale="0.1 0.1 0.1"></a-gltf-model>
+     </a-entity>
+   </a-scene>
+
+   <script>
+     const sceneEl = document.querySelector("#scene");
+     const startBtn = document.querySelector("#startBtn");
+     const stopBtn = document.querySelector("#stopBtn");
+
+     startBtn.addEventListener("click", () => {
+       sceneEl.components["mindar-image"].start();
+       startBtn.disabled = true;
+       stopBtn.disabled = false;
+     });
+
+     stopBtn.addEventListener("click", () => {
+       sceneEl.components["mindar-image"].stop();
+       startBtn.disabled = false;
+       stopBtn.disabled = true;
+     });
+   </script>
+ </body>
 </html>
