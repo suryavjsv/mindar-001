@@ -18,6 +18,8 @@
       const mindarThree = new MindARThree({
         container: document.querySelector("#container"),
         imageTargetSrc: "./city.mind", // your image target file
+        filterMinCF: 0.001,
+        filterBeta: 0.001,
       });
       const { renderer, scene, camera } = mindarThree;
 
@@ -75,12 +77,12 @@
       }
       #control {
         position: fixed;
-        bottom: 20px;              /* stick to bottom */
-        left: 50%;                 /* center horizontally */
+        bottom: 20px; /* stick to bottom */
+        left: 50%; /* center horizontally */
         transform: translateX(-50%);
         z-index: 2;
         display: flex;
-        gap: 12px;                 /* spacing between buttons */
+        gap: 12px; /* spacing between buttons */
       }
       #control button {
         padding: 10px 22px;
@@ -90,7 +92,7 @@
         font-weight: 600;
         cursor: pointer;
         color: white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         transition: all 0.2s ease;
       }
       /* Start button (blue) */
